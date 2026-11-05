@@ -3,16 +3,17 @@ import os
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 
-load_dotenv()
+# override=True makes the .env file win over stale shell/Windows variables
+load_dotenv(override=True)
 
-OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
-DIAGNOSTICS_MODEL_ID = os.environ["DIAGNOSTICS_MODEL_ID"]  # e.g. gpt-4o
-REMEDIATION_MODEL_ID = os.environ["REMEDIATION_MODEL_ID"]  # e.g. gpt-4o
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"].strip()
+DIAGNOSTICS_MODEL_ID = os.environ["DIAGNOSTICS_MODEL_ID"]
+REMEDIATION_MODEL_ID = os.environ["REMEDIATION_MODEL_ID"]
 
-# Optional: Azure/OpenAI-compatible gateways or proxies
+# Optional: proxy or OpenAI-compatible gateway
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL") or None
-OPENAI_TIMEOUT = float(os.getenv("OPENAI_TIMEOUT", "60"))
-OPENAI_MAX_RETRIES = int(os.getenv("OPENAI_MAX_RETRIES", "2"))
+OPENAI_TIMEOUT = float(os.getenv("OPENAI_TIMEOUT", "180"))
+OPENAI_MAX_RETRIES = int(os.getenv("OPENAI_MAX_RETRIES", "5"))
 
 
 def _build_model(model_id: str, temperature: float) -> ChatOpenAI:
@@ -23,7 +24,7 @@ def _build_model(model_id: str, temperature: float) -> ChatOpenAI:
         base_url=OPENAI_BASE_URL,
         timeout=OPENAI_TIMEOUT,
         max_retries=OPENAI_MAX_RETRIES,
-        stream_usage=True,  # keeps usage_metadata populated when streaming (used by usage_tracker)
+        stream_usage=True,  # keeps usage_metadata populated (used by usage_tracker)
     )
 
 

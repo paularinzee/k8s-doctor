@@ -7,6 +7,9 @@ from langchain_core.messages import AIMessage, HumanMessage
 logger = logging.getLogger(__name__)
 
 MAX_TURNS = int(os.getenv("CONVERSATION_HISTORY_TURNS", "20"))
+# Max characters kept per saved message (was a hard-coded 500, which cut off
+# diagnostic reports and made follow-ups like "delete those pods" lose context).
+MAX_CHARS = int(os.getenv("CONVERSATION_MAX_CHARS", "3000"))
 
 class _InMemoryStore:
     def __init__(self):
@@ -88,6 +91,6 @@ class ConversationStore:
 
     def record(self, user_text: str, assistant_text: str) -> None:
         try:
-            self._impl.save((user_text or "")[:500], (assistant_text or "")[:500])
+            self._impl.save((user_text or "")[:MAX_CHARS], (assistant_text or "")[:MAX_CHARS])
         except Exception as e:
             logger.error(f"Could not save conversation history: {e}")
